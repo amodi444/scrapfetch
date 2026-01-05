@@ -1,50 +1,33 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <sys/sysinfo.h>
 
+#define BUF_LEN 256
+#define shell_read_arr(cmd, arr) shell_read(cmd, arr, sizeof(arr))
+
+void shell_read(const char* command, char* buf, size_t buf_len){
+    FILE *f = popen(command, "r");
+    fgets(buf, buf_len, f);
+    pclose(f);
+    buf[strcspn(buf, "\n")] = 0;
+}
 int main(){
-    char struser[256];
-    char strdist[256];
-    char strkernel[256];
-    char strhn[256];
-    char *strscrp;
-    char strde[256];
+    char user[BUF_LEN],
+        dist[BUF_LEN],
+        kernel[BUF_LEN],
+        hn[BUF_LEN],
+        de[BUF_LEN];
 
     printf("scrapfetch\n");
 
-    FILE *user = popen("whoami", "r");
-    fgets(struser, sizeof(struser), user);
-    pclose(user);
-    struser[strcspn(struser, "\n")] = 0;
-
-    FILE *hn = popen("hostname", "r");
-    fgets(strhn, sizeof(strhn), hn);
-    pclose(hn);
-    strhn[strcspn(strhn, "\n")] = 0;
-
-    FILE *dist = popen("grep '^NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '\"'", "r");
-    fgets(strdist, sizeof(strdist), dist);
-    pclose(dist);
-    strdist[strcspn(strdist, "\n")] = 0;
-
-    FILE *kernel = popen("uname -r", "r");
-    fgets(strkernel, sizeof(strkernel), kernel);
-    pclose(kernel);
-    strkernel[strcspn(strkernel, "\n")] = 0;
+    shell_read_arr("whoami", user);
+    shell_read_arr("hostname", hn);
+    shell_read_arr("grep '^NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '\"'", dist);
+    shell_read_arr("uname -r", kernel);
+    shell_read_arr("echo $XDG_CURRENT_DESKTOP", de);
 
     FILE *scrp = popen("which scrap 2>/dev/null", "r");
-    if(scrp == NULL){
-        strscrp = "not installed";
-    }else{
-        strscrp = "installed";
-    }
 
-    FILE *de = popen("echo $XDG_CURRENT_DESKTOP", "r");
-    fgets(strde, sizeof(strde), de);
-    pclose(de);
-    strde[strcspn(strde, "\n")] = 0;
+    char* scrp_status = scrp ? "installed" : "not installed";
     printf(
         "\033[32m@@@@@@@@@::.....:@@@\n"
         "@: :..... ......:@@@   %s@%s\n"
@@ -56,7 +39,7 @@ int main(){
         "@@@@++=+==--:.... .:\n"
         "@@@::..... ......:@@\n"
         "@@@:... ..:@@@@@@@@@\n\033[0m"
-        , struser, strhn, strkernel, strdist, strde, strscrp, strdist
+        , user, hn, kernel, dist, de, scrp_status, dist
     );
 
 
