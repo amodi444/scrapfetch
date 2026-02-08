@@ -15,7 +15,8 @@ int main(){
         dist[BUF_LEN],
         kernel[BUF_LEN],
         hn[BUF_LEN],
-        de[BUF_LEN];
+        de[BUF_LEN],
+        scrp[BUF_LEN];
 
     printf("scrapfetch\n");
 
@@ -24,10 +25,9 @@ int main(){
     shell_read_arr("grep '^NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '\"'", dist);
     shell_read_arr("uname -r", kernel);
     shell_read_arr("echo $XDG_CURRENT_DESKTOP", de);
-
-    FILE *scrp = popen("which scrap > /dev/null 2>&1 ; echo $?", "r");
-
-    char* scrp_status = scrp ? "installed" : "not installed";
+    shell_read_arr("which scrap > /dev/null 2>&1 ; echo $?", scrp);
+    
+    char* scrp_status = !scrp ? "installed" : "not installed";
     printf(
         "\033[32m@@@@@@@@@::.....:@@@\n"
         "@: :..... ......:@@@   %s@%s\n"
