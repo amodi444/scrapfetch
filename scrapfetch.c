@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -25,9 +26,9 @@ int main(){
     shell_read_arr("grep '^NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '\"'", dist);
     shell_read_arr("uname -r", kernel);
     shell_read_arr("echo $XDG_CURRENT_DESKTOP", de);
-    shell_read_arr("which scrap > /dev/null 2>&1 ; echo $?", scrp);
+    shell_read_arr("type scrap >/dev/null 2>&1 && echo 1 || echo 0", scrp);
     
-    char* scrp_status = !scrp ? "installed" : "not installed";
+    char* scrp_status = (atoi(scrp)==1) ? "installed" : "not installed";
     printf(
         "\033[32m@@@@@@@@@::.....:@@@\n"
         "@: :..... ......:@@@   %s@%s\n"
