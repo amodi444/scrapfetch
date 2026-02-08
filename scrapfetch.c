@@ -20,12 +20,12 @@ int main(){
     printf("scrapfetch\n");
 
     shell_read_arr("whoami", user);
-    shell_read_arr("hostname", hn);
+    shell_read_arr("uname -n", hn);
     shell_read_arr("grep '^NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '\"'", dist);
     shell_read_arr("uname -r", kernel);
     shell_read_arr("echo $XDG_CURRENT_DESKTOP", de);
 
-    FILE *scrp = popen("which scrap 2>/dev/null", "r");
+    FILE *scrp = popen("which scrap > /dev/null 2>&1 ; echo $?", "r");
 
     char* scrp_status = scrp ? "installed" : "not installed";
     printf(
